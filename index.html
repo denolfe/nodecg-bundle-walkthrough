@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+
+	<title>reveal.js – The HTML Presentation Framework</title>
+
+	<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+	<meta name="author" content="Hakim El Hattab">
+
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/moon.css" id="theme">
+
+	<!-- Code syntax highlighting -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+	<style type="text/css"> 
+
+		.gist {
+			/*max-width:350px;*/
+			overflow:auto;
+		}
+
+		.gist .blob-wrapper.data {
+			max-height:500px;
+			overflow:auto;
+	}
+	
+	</style>
+
+	<!--[if lt IE 9]>
+	<script src="lib/js/html5shiv.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+
+	<div class="reveal">
+
+		<!-- Any section element inside of this container is displayed as a slide -->
+		<div class="slides">
+
+			<section>
+				<section data-markdown>
+					<script type="text/template">
+						# Project Walkthrough
+						#### by Elliot DeNolf
+
+						Today, I will be walking through a plugin I wrote for [NodeCG](http://nodecg.com/) which incorporates the following:
+
+						- Node.js on the back-end
+						  - Spotify and Last.fm APIs
+						- HTML, CSS, Javascript on the front-end
+
+						**Space** to move forward, **Shift+Space** to move backward
+						</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						# Background Info
+
+						NodeCG is a broadcast graphics framework built on top of Express. It allows a developer to write "bundles" which contain an admin panel, a broadcast view, and, optionally, a Node.js extension to perform back-end operations.
+						</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						# Basic Plugin Anatomy
+
+						```bash
+						|-- extension.js      // Node.js file mounted on Express
+						|-- nodecg.json       // Details of the plugin
+						|-- dashboard       // Admin panel
+						|   |-- panel.html
+						|   |-- panel.css
+						|   |-- panel.js
+						|   `-- panels.json
+						`-- view              // Broadcast view
+						    |-- index.html
+						    |-- styles.css
+						    `-- script.js
+						```
+						</script>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<script type="text/template">
+						# Plugin details
+
+						The functionality of the plugin is the following:
+
+						- Read the user&apos;s currently playing song via the Last.fm API
+						- Use Spotify&apos;s Web API to retrieve the song&apos;s album art
+						- Present the song info
+						  - Admin panel allowing the broadcaster to show/hide the album art
+						  - Broadcast view showing the album art with a flashy animation
+					</script>
+				</section>
+				<!-- <section data-background-iframe="https://www.youtube.com/embed/JhGTBgTJOIs?hl=en&amp;autoplay=1&amp;cc_load_policy=0&amp;loop=0&amp;iv_load_policy=1&amp;fs=1&amp;showinfo=0"> -->
+				<section>
+					<h1>Preview</h1>
+							<iframe style="height:500px;width:100%;border:0;" frameborder="0" src="https://www.youtube.com/embed/JhGTBgTJOIs?hl=en&amp;autoplay=0&amp;cc_load_policy=0&amp;loop=0&amp;iv_load_policy=1&amp;fs=1&amp;showinfo=0"></iframe>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<script type="text/template">
+						# Extension.js
+
+						This is the meat of the plugin. This polls the Last.fm API for a song change then queries the Spotify API for the album art.
+
+					</script>
+				</section>
+				<section>
+					<h3>extension.js</h1>
+					<script src="https://gist.github.com/denolfe/bba80e206c539fa8f497.js?file=extension.js"></script>
+				</section>
+				<section data-markdown>
+				Extension.js will pull the album art from the API and drop it into a local .jpg file.
+
+				NodeCG has a construct called *replicants*. They are essentially javascript objects that, when changed, are sent to the view via websockets. The replicant used to send the song information is called **`songInfo`**.
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					# Broadcast View
+
+					This is what will be shown on the broadcast. When the `songInfo` is changed, our javascript file detects it, phases out the old album art, and phases in the new. The controller for most of the logic happens in the **`songInfo.on('change')`** function. Everything else is jQuery transitions.
+				</section>
+				<section>
+					<h3>script.js</h3>
+					<script src="https://gist.github.com/denolfe/bba80e206c539fa8f497.js?file=script.js"></script>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					# Dashboard Panel
+
+					This uses the same **`songInfo.on('change')`** function as the broadcast view. It refreshes the admin panel with the song's artist/title and the album art.
+				</section>
+				<section>
+					<h3>panel.js</h3>
+					<script src="https://gist.github.com/denolfe/bba80e206c539fa8f497.js?file=panel.js"></script>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					# To Sum It Up
+
+					Whenever the broadcaster changes his song...
+
+					1. Song change is detected via Last.fm API
+					2. Album Art retrieved from Spotify API
+					3. Broadcast view and dashboard panel are updated with the correct info
+				</section>
+				<section>
+					<h2>Final Result (one more time...)</h2>
+							<iframe style="height:500px;width:100%;border:0;" frameborder="0" src="https://www.youtube.com/embed/JhGTBgTJOIs?hl=en&amp;autoplay=0&amp;cc_load_policy=0&amp;loop=0&amp;iv_load_policy=1&amp;fs=1&amp;showinfo=0"></iframe>
+				</section>
+			</section>
+			<section data-markdown>
+				# Links
+
+				- [Gist files](https://gist.github.com/denolfe/bba80e206c539fa8f497)
+				- [NodeCG](http://nodecg.com/)
+			</section>
+			
+	</div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'convex', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+</body>
+</html>
